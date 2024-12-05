@@ -38,7 +38,6 @@ function fetchAISolution(cveId, buttonElement) {
         return;
     }
 
-    // Show loading state
     buttonElement.disabled = true;
     const originalContent = buttonElement.innerHTML;
     buttonElement.innerHTML = `
@@ -50,7 +49,6 @@ function fetchAISolution(cveId, buttonElement) {
     fetch(`/api/ai?cve_id=${cveId}`)
         .then(response => response.json())
         .then(data => {
-            // Create response element
             const responseDiv = document.createElement('div');
             responseDiv.className = 'ai-response mt-5 p-4 bg-gray-50 rounded-lg';
             responseDiv.innerHTML = `
@@ -63,7 +61,6 @@ function fetchAISolution(cveId, buttonElement) {
             buttonElement.after(responseDiv);
         })
         .catch(error => {
-            // Show error message
             console.log(error)
             const errorDiv = document.createElement('div');
             errorDiv.className = 'ai-response mt-5 p-4 bg-red-50 text-red-600 rounded-lg';
@@ -71,26 +68,41 @@ function fetchAISolution(cveId, buttonElement) {
             buttonElement.after(errorDiv);
         })
         .finally(() => {
-            // Restore button state
             buttonElement.disabled = false;
             buttonElement.innerHTML = originalContent;
         });
 }
 
-function createTableRow() {
-    fetch('/api/cve')
-        .then(response => response.json())
-        .then(data => {
-            const tbody = document.querySelector('tbody')
-            tbody.innerHTML = data.map((item, index) => {
-                let severityColor = 'bg-gray-500';
-                if (item.vulnerability.severity.level === 'CRITICAL') {
-                    severityColor = 'bg-red-500';
-                } else if (item.vulnerability.severity.level === 'HIGH') {
-                    severityColor = 'bg-orange-500';
-                }
+let tableState = {
+    originalData: [],
+    filteredData: [],
+    currentSearchTerm: '',
+    filters: {
+        severity: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN']
+    },
+    sort: {
+        column: null,
+        direction: 'asc'
+    }
+};
 
-                return `
+function renderTable() {
+    const tbody = document.querySelector('tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = tableState.filteredData.map((item, index) => {
+        let severityColor = 'bg-gray-500';
+        if (item.vulnerability.severity.level === 'CRITICAL') {
+            severityColor = 'bg-red-500';
+        } else if (item.vulnerability.severity.level === 'HIGH') {
+            severityColor = 'bg-orange-500';
+        } else if (item.vulnerability.severity.level === 'MEDIUM') {
+            severityColor = 'bg-yellow-500'
+        } else if (item.vulnerability.severity.level === 'LOW') {
+            severityColor = 'bg-blue-500'
+        }
+
+        return `
             <tr class="py-10 cursor-pointer border-b border-gray-200 hover:bg-gray-100" 
                 onclick="toggleDescription('cve${index}')">
                 <td class="px-4 py-4">
@@ -118,17 +130,58 @@ function createTableRow() {
                 <td colspan="4" class="p-8">
                     <h4 class="font-medium text-base mb-2">Vulnerability Description</h4>
                     <p class="text-sm text-gray-600">${item.vulnerability.description}</p>
-                    <div class="mt-8">
+                    <div class="relative overflow-x-auto mt-5">
+                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" class="py-3">
+                                        Severity Level
+                                    </th>
+                                    <th scope="col" class="py-3">
+                                        Base Score
+                                    </th>
+                                    <th scope="col" class="py-3">
+                                        Vector
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                    <th scope="row" class=" py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        ${item.vulnerability.severity.level ? item.vulnerability.severity.level : 'UNKNOWN'}
+                                    </th>
+                                    <td class="py-4">
+                                        ${item.vulnerability.severity.baseScore ? item.vulnerability.severity.baseScore : 'N/A'}
+                                    </td>
+                                    <td class="py-4">
+                                        ${item.vulnerability.severity.vector ? item.vulnerability.severity.vector : 'N/A'}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-5">
+                        <h4 class="font-medium text-base mb-2">Common Weakness Enumeration</h4>
+                        ${item.problemTypes.reference ? 
+                            `<a href="${item.problemTypes.reference}" class="text-sm text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">${item.problemTypes.description}</a>` :
+                            `<p class="text-sm text-gray-600">${item.problemTypes.description}</p>`
+                        }
+                    </div>                 
+                    <div class="mt-5"> 
+                        <h4 class="font-medium text-base mb-2">National Institute of Standards and Technology</h4> 
+                        <a target="_blank" rel="noopener noreferrer"  class="text-sm text-blue-600 dark:text-blue-500 hover:underline" href="https://nvd.nist.gov/vuln/detail/${item.cve_id}">https://nvd.nist.gov/vuln/detail/${item.cve_id}</a>
+                    </div>
+                    <div class="mt-5">
                         <h4 class="font-medium text-base mb-2">References</h4>
                         <div class="mt-2">
-                            ${Array.isArray(item.references) 
-                                ? item.references.map(ref => `
+                            ${Array.isArray(item.references)
+            ? item.references.map(ref => `
                                 <div>
                                     <a target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 dark:text-blue-500 hover:underline" href=${typeof ref === 'string' ? ref : ref.url || JSON.stringify(ref)}>${typeof ref === 'string' ? ref : ref.url || JSON.stringify(ref)}</a>
                                 </div>
                                 `).join('')
-                                : 'No references available'
-                            }
+            : 'No references available'
+        }
                         </div>
                     </div>
                     <div class="mt-5">
@@ -144,8 +197,74 @@ function createTableRow() {
                     </button>
                 </td>
             </tr>
-          `;
-            }).join('');
+        `;
+    }).join('');
+}
+
+function applySearchAndFilters(searchTerm = '') {
+    tableState.currentSearchTerm = searchTerm.toLowerCase().trim();
+
+    tableState.filteredData = tableState.originalData.filter(item => {
+        const cveId = item?.metadata?.id?.toLowerCase() || '';
+        const matchesSearch = !tableState.currentSearchTerm ||
+            cveId === tableState.currentSearchTerm ||
+            cveId.startsWith(tableState.currentSearchTerm) ||
+            cveId.includes(tableState.currentSearchTerm);
+
+        const severity = item.vulnerability.severity.level || 'UNKNOWN';
+        const matchesFilter = tableState.filters.severity.includes(severity);
+
+        return matchesSearch && matchesFilter;
+    });
+
+    renderTable();
+}
+
+function createTableRow() {
+    fetch('/api/cve')
+        .then(response => response.json())
+        .then(data => {
+            tableState.originalData = data;
+            tableState.filteredData = data;
+            renderTable();
         });
 }
-window.onload = createTableRow;
+
+function filter() {
+    const dropdownMenu = document.getElementById('dropdownDefaultCheckbox');
+    const checkboxes = dropdownMenu?.querySelectorAll('input[type="checkbox"]');
+
+    checkboxes?.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const value = this.value;
+            const isChecked = this.checked;
+
+            if (isChecked) {
+                if (!tableState.filters.severity.includes(value)) {
+                    tableState.filters.severity.push(value);
+                }
+            } else {
+                tableState.filters.severity = tableState.filters.severity.filter(v => v !== value);
+            }
+            applySearchAndFilters(tableState.currentSearchTerm);
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('default-search');
+    if (!searchInput) {
+        console.error('Search input not found');
+        return;
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value;
+        applySearchAndFilters(searchTerm);
+    });
+});
+
+window.onload = () => {
+    createTableRow();
+    filter();
+};

@@ -1,11 +1,14 @@
 import json
 import re
 import asyncio
-import pdb
-from typing import List
 import aiohttp
 from bs4 import BeautifulSoup
 from g4f.client import Client
+import sys
+
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 
 class CVE:
     def __init__(self, cve_codes: list[str]):
@@ -22,7 +25,7 @@ class CVE:
     def get_nist_nvd_url(cve_code):
         return f"https://nvd.nist.gov/vuln/detail/{cve_code}"
 
-    def fetch_cve_information(self) -> List[dict]:
+    def fetch_cve_information(self) -> dict:
         return asyncio.run(self.__run_tasks())
 
     async def __fetch_data(self, url: str, headers: dict[str, str] = None, params: dict = None, data: dict = None, mapping: any = None) -> dict | tuple[any, dict]:
@@ -31,21 +34,28 @@ class CVE:
                 async with session.get(url, headers=headers, params=params, data=data) as response:
                     response.raise_for_status()
                     if mapping:
-                        return mapping, await response.json()
+                        return {"id": mapping, "html": await response.text()}
                     return await response.json()
         except aiohttp.ClientError as error:
             self.errors.append(error)
 
-    async def __run_tasks(self) -> list[dict]:
+    async def __run_tasks(self) -> dict:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
         }
         tasks = [self.__fetch_data(url=self.nist_nvd_api(cve_code=cve_code), headers=headers) for cve_code in self.cve_codes]
         self.result = await asyncio.gather(*tasks)
-        return await self.__format_data()
 
+        is_error = len(self.errors) != 0
+        if is_error:
+            print("Server is most likely down or Service is temporarilly suspended. Please Check a sample site like https://www.cve.org/CVERecord?id=CVE-2022-22971 to see if there are similar problems.")
+            print("If the Server is running, In addition, Make sure Global Protect is in Central Canada for best result")
+            print("Please also make sure the CVE codes are valid in the text file inputted.")
+        return await self.__format_data(is_error)
 
-    async def __format_data(self) -> list[dict]:
+    async def __format_data(self, errors: bool = False) -> dict:
+        if errors:
+            return {"statusCode": 400}
         formatted_list = []
         nist_nvd_task = []
         for raw_data in self.result:
@@ -53,10 +63,8 @@ class CVE:
                 data = json.loads(raw_data)
             else:
                 data = raw_data
-
             cna = data.get('containers', {}).get('cna', {})
             adp = data.get('containers', {}).get('adp', [{}])[0]
-
             text = cna.get('descriptions', [{}])[0].get('value', '')
             if '\n\n' in text:
                 description, solution = text.split('\n\n', 1)
@@ -78,20 +86,13 @@ class CVE:
                 match = re.search(pattern, description)
                 if match:
                     base_score = match.group(1)
-                    if float(base_score) >= 9.0:
-                        base_severity = "CRITICAL"
-                    elif float(base_score) >= 7.0:
-                        base_severity = "HIGH"
-                    elif float(base_score) >= 4.0:
-                        base_severity = "MEDIUM"
-                    elif float(base_score) >= 0.1:
-                        base_severity = "LOW"
-                    else:
-                        base_severity = "None"
+                    base_severity = self.find_severity(base_score)
                 else:
                     nist_nvd_task.append(self.__fetch_data(url=self.get_nist_nvd_url(data.get('cveMetadata', {}).get('cveId')), mapping=data.get('cveMetadata', {}).get('cveId')))
 
+            cwe_id = cna.get('problemTypes', [{}])[0].get('descriptions', [{}])[0].get('cweId')
             formatted_data = {
+                "cve_id": data.get('cveMetadata', {}).get('cveId'),
                 'metadata': {
                     'id': data.get('cveMetadata', {}).get('cveId'),
                     'state': data.get('cveMetadata', {}).get('state'),
@@ -123,29 +124,61 @@ class CVE:
                     }
                     for ref in cna.get('references', [])
                 ],
-                'Problem Types': {
-                    'cweId': cna.get('problemTypes', [{}])[0].get('descriptions', [{}])[0].get('cweId'),
+                'problemTypes': {
+                    'cweId': cwe_id,
                     'description': cna.get('problemTypes', [{}])[0].get('descriptions', [{}])[0].get('description'),
+                    'reference': f'https://cwe.mitre.org/data/definitions/{cwe_id.split("-")[1]}.html' if cwe_id and '-' in cwe_id else None
                 }
             }
             formatted_list.append(formatted_data)
         if len(nist_nvd_task) > 0:
-            results = await asyncio.gather(*nist_nvd_task)
+            responses = await asyncio.gather(*nist_nvd_task)
+            memo = {}
+            results = list(filter(None, responses))
             for result in results:
-                pdb.set_trace()
+                soup = BeautifulSoup(result.get('html'), 'html.parser')
+                find = soup.find('a', id='Cvss3NistCalculatorAnchor')
+                if find:
+                    match = re.search(r'\d+\.?\d*', find.text)
+                    if match:
+                        score = match.group()
+                        base_severity = self.find_severity(score)
+                        memo[result.get('id')] = (score, base_severity)
 
-        return self.sort_vulnerabilities(formatted_list)
+            for data in formatted_list:
+                cve_id = data['cve_id']
+                if cve_id in memo:
+                    se = data['vulnerability']['severity']
+                    se['level'] = memo[cve_id][1]
+                    se['severity'] = memo[cve_id][0]
+            self.sort_vulnerabilities(formatted_list)
+        return {"statusCode": 200, "data": self.sort_vulnerabilities(formatted_list)}
 
     @staticmethod
     async def _run_tasks(task_list):
         return await asyncio.gather(*task_list)
+
+    @staticmethod
+    def find_severity(base_score: str):
+        if float(base_score) >= 9.0:
+            base_severity = "CRITICAL"
+        elif float(base_score) >= 7.0:
+            base_severity = "HIGH"
+        elif float(base_score) >= 4.0:
+            base_severity = "MEDIUM"
+        elif float(base_score) >= 0.1:
+            base_severity = "LOW"
+        else:
+            base_severity = "None"
+
+        return base_severity
 
 
     @staticmethod
     def sort_vulnerabilities(vulnerability_list):
         """
         Sort vulnerabilities by severity level with custom ordering:
-        CRITICAL > HIGH > None (or other values)
+        CRITICAL > HIGH > MEDIUM > LOW > None (or other values)
 
         Args:
             vulnerability_list (list): List of vulnerability dictionaries
@@ -158,8 +191,10 @@ class CVE:
             severity = vuln.get('vulnerability', {}).get('severity', {}).get('level')
 
             severity_order = {
-                'CRITICAL': 3,
-                'HIGH': 2,
+                'CRITICAL': 5,
+                'HIGH': 4,
+                'MEDIUM': 3,
+                'LOW': 2,
                 None: 1
             }
 
@@ -171,9 +206,10 @@ class CVE:
     def prompt_ai(message: dict):
         client = Client()
         response = client.chat.completions.create(
-            model="claude-3.5-sonnet",
+            model="llama-3.1-70b",
             messages=[{"role": "user", "content": f"Tell me how to fix this CVE in less than 100 words. Here is the Information of the CVE in JSON: {message}"}],
         )
         return response.choices[0].message.content
+        pass
 
 

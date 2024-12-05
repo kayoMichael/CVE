@@ -1,2 +1,6 @@
 cve.txt
 .idea/
+build
+.venv
+__pycache__/
+*.pyc
