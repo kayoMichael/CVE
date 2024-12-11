@@ -1,4 +1,5 @@
 import json
+import pdb
 import re
 import asyncio
 import aiohttp
@@ -48,7 +49,7 @@ class CVE:
 
         is_error = len(self.errors) != 0
         if is_error:
-            print("Server is most likely down or Service is temporarilly suspended. Please Check a sample site like https://www.cve.org/CVERecord?id=CVE-2022-22971 to see if there are similar problems.")
+            print("Server is most likely down or Service is temporarily suspended. Please Check a sample site like https://www.cve.org/CVERecord?id=CVE-2022-22971 to see if there are similar problems.")
             print("If the Server is running, In addition, Make sure Global Protect is in Central Canada for best result")
             print("Please also make sure the CVE codes are valid in the text file inputted.")
         return await self.__format_data(is_error)
@@ -150,7 +151,7 @@ class CVE:
                 if cve_id in memo:
                     se = data['vulnerability']['severity']
                     se['level'] = memo[cve_id][1]
-                    se['severity'] = memo[cve_id][0]
+                    se['baseScore'] = memo[cve_id][0]
             self.sort_vulnerabilities(formatted_list)
         return {"statusCode": 200, "data": self.sort_vulnerabilities(formatted_list)}
 
@@ -210,6 +211,5 @@ class CVE:
             messages=[{"role": "user", "content": f"Tell me how to fix this CVE in less than 100 words. Here is the Information of the CVE in JSON: {message}"}],
         )
         return response.choices[0].message.content
-        pass
 
 
