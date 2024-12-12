@@ -1,6 +1,6 @@
 # CVE Utility
 
-This is a simple utility to fetch CVE details from the [National Vulnerability Database](https://nvd.nist.gov/). and [CVE Mitre](https://cve.mitre.org/). \
+This is a simple utility to fetch CVE details from the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/). \
 It is written in Python, JavaScript, HTML and Tailwind CSS. \
 The AI model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/)
 
@@ -8,7 +8,7 @@ The AI model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/
 
 ### Windows OS
 
-1. Download the Repository as a Zip File (For non-git user).
+1. Download the Repository as a Zip File (For git user, clone the repo).
 2. Extract the Zip File.
 3. Open the extracted folder in Command Prompt.
 4. Run the following setup Command
@@ -24,9 +24,9 @@ The AI model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/
 
 
 ### Linux/Mac OS
-1. Download the Repository as a Zip File (For non-git user).
+1. Download the Repository as a Zip File (For git user, clone the repo).
 2. Extract the Zip File.
-3. Open the extracted folder in Command Prompt.
+3. Open the extracted folder in Terminal.
 4. Run the following setup Command
    ```shell
    make all
@@ -36,4 +36,4 @@ The AI model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/
     ```shell
     make run
     ```
-7. To end the server, run cmd + C in the command prompt.
+7. To end the server, run cmd + C in the Terminal.
