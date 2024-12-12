@@ -15,17 +15,17 @@ help:
 	@echo "  check-python     - Verify Python installation"
 	@echo "  create-venv      - Create Python virtual environment"
 	@echo "  install-deps     - Install/update project dependencies"
-	@echo "  clean           - Remove virtual environment and temporary files"
-	@echo "  check-g4f       - Check and update g4f package if needed"
-	@echo "  show-versions   - Display installed and latest g4f versions"
-	@echo "  run             - Run the application with optional CVE file"
+	@echo "  clean            - Remove virtual environment and temporary files"
+	@echo "  check-g4f        - Check and update g4f package if needed"
+	@echo "  show-versions    - Display installed and latest g4f versions"
+	@echo "  run              - Run the application with optional CVE file"
 
 define get_latest_version
 $(shell curl -s https://pypi.org/pypi/g4f/json | $(PYTHON) -c "import json, sys; print(json.load(sys.stdin)['info']['version'])")
 endef
 
-define get_installed_version
-$(shell pip show g4f | findstr "Version:" 2>nul | $(PYTHON) -c "import sys; print(sys.stdin.read().split(': ')[1].strip())")
+define check_g4f_installed
+$(shell $(PIP) list 2>/dev/null | grep -q "^g4f " 2>/dev/null && echo "yes" || echo "no")
 endef
 
 G4F_INSTALLED_VERSION := $(call get_installed_version,INSTALLED)
@@ -38,26 +38,27 @@ all: check-python create-venv install-deps
 
 check-python:
 	@echo "Checking Python installation..."
-	@if ! command -v python >/dev/null 2>&1; then \
+	@if ! command -v python3 >/dev/null 2>&1; then \
 		echo "Python not found. Installing Python..."; \
 		$(MAKE) install-python; \
 	else \
-		echo "Python $(shell python --version) found."; \
+		echo "Python $(shell python3 --version) found."; \
 	fi
 
 install-python:
-	@if command -v winget >/dev/null 2>&1; then \
-		winget install -e --id Python.Python.3.11; \
+	@if command -v brew >/dev/null 2>&1; then \
+		echo "Installing Python $(PYTHON_VERSION) via Homebrew..."; \
+		brew install python@$(PYTHON_VERSION); \
 		echo "Installed Python $(PYTHON_VERSION)"; \
 	else \
-		echo "Error: winget not found. Please install Python $(PYTHON_VERSION) manually from python.org"; \
+		echo "Error: Homebrew not found. Please install Python $(PYTHON_VERSION) manually from python.org"; \
 		exit 1; \
 	fi
 
 create-venv:
 	@echo "Setting up virtual environment..."
 	@if [ ! -d "$(VENV_DIR)" ]; then \
-		python -m venv $(VENV_DIR); \
+		python3 -m venv $(VENV_DIR); \
 		echo "Virtual environment created successfully."; \
 	else \
 		echo "Virtual environment already exists."; \
@@ -75,22 +76,35 @@ clean:
 	@echo "Cleanup complete!"
 
 check-g4f:
-	@echo "Installed version: $(G4F_INSTALLED_VERSION)"
-	@echo "Latest version: $(G4F_LATEST_VERSION)"
-	@if [ "$(G4F_INSTALLED_VERSION)" != "$(G4F_LATEST_VERSION)" ]; then \
-		echo "Updating g4f to latest version..."; \
-		$(PIP) install --upgrade g4f; \
+	@if [ "$(call check_g4f_installed)" = "no" ]; then \
+		echo "g4f not found. Installing..."; \
+		$(PIP) install g4f; \
 	else \
-		echo "g4f is already at the latest version."; \
+		INSTALLED_VERSION=$$($(PIP) show g4f | grep "Version:" | cut -d " " -f 2); \
+		LATEST_VERSION=$(call get_latest_version); \
+		echo "Installed version: $$INSTALLED_VERSION"; \
+		echo "Latest version: $$LATEST_VERSION"; \
+		if [ "$$INSTALLED_VERSION" != "$$LATEST_VERSION" ]; then \
+			echo "Updating g4f to latest version..."; \
+			$(PIP) install --upgrade g4f; \
+		else \
+			echo "g4f is already at the latest version."; \
+		fi \
 	fi
 
+
 show-versions:
-	@echo "Installed version: $(G4F_INSTALLED_VERSION)"
-	@echo "Latest version: $(G4F_LATEST_VERSION)"
+	@if [ "$(call check_g4f_installed)" = "yes" ]; then \
+		INSTALLED_VERSION=$$($(PIP) show g4f | grep "Version:" | cut -d " " -f 2); \
+		echo "Installed version: $$INSTALLED_VERSION"; \
+		echo "Latest version: $(call get_latest_version)"; \
+	else \
+		echo "g4f is not installed."; \
+	fi
 
 run:
-    @$(MAKE) check-g4f
-    @$(MAKE) show-versions
+	@$(MAKE) check-g4f
+	@$(MAKE) show-versions
 	@read -p "Enter the path to the CVE file (default: $(CVES_FILE)): " input_file; \
 	file_to_use="$${input_file:-$(CVES_FILE)}"; \
 	echo "Running with file: $$file_to_use"; \

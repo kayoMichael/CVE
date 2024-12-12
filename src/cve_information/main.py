@@ -47,11 +47,22 @@ class CVE:
         tasks = [self.__fetch_data(url=self.nist_nvd_api(cve_code=cve_code), headers=headers) for cve_code in self.cve_codes]
         self.result = await asyncio.gather(*tasks)
 
-        is_error = len(self.errors) != 0
-        if is_error:
+        for error in self.errors[:]:
+            if str(error).startswith('404'):
+                match = re.search(r'CVE-\d{4}-\d+', str(error))
+                if match:
+                    self.errors.remove(error)
+                    print(f"The CVE code {match.group(0)} is not found in the database. Skipping...")
+                else:
+                    print(f"Server error occurred while fetching the data: {error}. Please check the input file for any errors.")
+        if len(self.errors) != 0 or len(self.result) == 0:
+            is_error = True
             print("Server is most likely down or Service is temporarily suspended. Please Check a sample site like https://www.cve.org/CVERecord?id=CVE-2022-22971 to see if there are similar problems.")
             print("If the Server is running, In addition, Make sure Global Protect is in Central Canada for best result")
             print("Please also make sure the CVE codes are valid in the text file inputted.")
+        else:
+            is_error = False
+
         return await self.__format_data(is_error)
 
     async def __format_data(self, errors: bool = False) -> dict:
@@ -62,8 +73,11 @@ class CVE:
         for raw_data in self.result:
             if isinstance(raw_data, str):
                 data = json.loads(raw_data)
+            elif raw_data is None:
+                continue
             else:
                 data = raw_data
+
             cna = data.get('containers', {}).get('cna', {})
             adp = data.get('containers', {}).get('adp', [{}])[0]
             text = cna.get('descriptions', [{}])[0].get('value', '')
