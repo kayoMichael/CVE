@@ -1,13 +1,12 @@
 # CVE Utility
 
-This is a simple utility to fetch CVE details from the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/). \
+A Utility to fetch CVE details from the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/). \
 It is written in Python, JavaScript, HTML and Tailwind CSS. \
-The AI model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/)
+The model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/)
 
 ## Setup
 
 ### Windows OS
-
 1. Download the Repository as a Zip File (Code -> Download ZIP)  or clone the repository (For Git users only).
 2. Open the extracted folder in Command Prompt.
 3. Run the following setup Command
