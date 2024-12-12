@@ -8,32 +8,38 @@ The AI model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/
 
 ### Windows OS
 
-1. Download the Repository as a Zip File (For git user, clone the repo).
-2. Extract the Zip File.
-3. Open the extracted folder in Command Prompt.
-4. Run the following setup Command
+1. Download the Repository as a Zip File (Code -> Download ZIP)  or clone the repository (For Git users only).
+2. Open the extracted folder in Command Prompt.
+3. Run the following setup Command
    ```shell
    cmd /c execute.bat all
    ```
-5. Create A .txt file with a list of CVEs in the same directory
-6. Run the following Command to run the script. It will ask for a cve file so give the cve.txt file as input
-    ```shell
-    cmd /c execute.bat run
-    ```
-7. To end the server, run control + C in the command prompt.
 
 
 ### Linux/Mac OS
-1. Download the Repository as a Zip File (For git user, clone the repo).
-2. Extract the Zip File.
-3. Open the extracted folder in Terminal.
-4. Run the following setup Command
+1. Download the Repository as a Zip File (Code -> Download ZIP) or clone the repository (For Git users only).
+2. Open the extracted folder in Terminal.
+3. Run the following setup Command
    ```shell
    make all
    ```
-5. Create A .txt file with a list of CVEs in the same directory
-6. Run the following Command to run the script. It will ask for a cve file so give the cve.txt file as input
+
+## Running the Utility
+
+### Windows OS
+1. Create A .txt file with a list of CVEs in the same directory
+2. Run the following Command to run the script.
+    ```shell
+    cmd /c execute.bat run
+    ```
+3. Input the cve file name into the command prompt when asked
+4. To end the server, run control + C in the command prompt.
+
+### Linux/Mac OS
+1. Create A .txt file with a list of CVEs in the same directory
+2. Run the following Command to run the script. It will ask for a cve file so give the cve.txt file as input
     ```shell
     make run
     ```
-7. To end the server, run cmd + C in the Terminal.
+3. Input the cve file name into the Terminal when asked
+4. To end the server, run cmd + C in the Terminal.
