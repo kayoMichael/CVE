@@ -42,3 +42,12 @@ The model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/met
     ```
 3. Input the cve file name into the Terminal when asked
 4. To end the server, run cmd + C in the Terminal.
+
+## TroubleShooting
+
+### For OPS Employees in the Office
+Please Set Global Protect Region to Canada Central If you are having issues connecting to the server.
+
+### Temporary Problems
+The Server that provides the API (Most likely CVE Mitre) is temporarily down sometimes due to maintenance. Please wait until the Server is back up and running to run the script again.
+Check the Command Prompt/Terminal to see if there are error messages pertaining to the Server.
