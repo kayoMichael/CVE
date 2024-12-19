@@ -1,53 +1,101 @@
 # CVE Utility
 
-A Utility to fetch CVE details from the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/). \
-It is written in Python, JavaScript, HTML and Tailwind CSS. \
-The model used for AI suggestion is [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/)
+A utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE) information from authoritative sources including the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/).
 
-## Setup
+## Features
 
-### Windows OS
-1. Download the Repository as a Zip File (Code -> Download ZIP)  or clone the repository (For Git users only).
-2. Open the extracted folder in Command Prompt.
-3. Run the following setup Command
+- Bulk CVE information retrieval
+- Vulnerability analysis
+- AI-powered suggestions using Meta's [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/) model
+- Basic Filtering and Searching Capabilities.
+
+## Installation
+
+### Windows
+
+1. **Get the Code**
+   - Option 1: Download ZIP
+     - Click "Code" → "Download ZIP" on the repository page
+     - Extract the ZIP file to your desired location
+   - Option 2: Clone with Git
+     ```shell
+     git clone https://github.com/yourusername/cve-utility.git
+     cd cve-utility
+     ```
+
+2. **Run Setup**
    ```shell
    cmd /c execute.bat all
    ```
 
+### Linux/macOS
 
-### Linux/Mac OS
-1. Download the Repository as a Zip File (Code -> Download ZIP) or clone the repository (For Git users only).
-2. Open the extracted folder in Terminal.
-3. Run the following setup Command
+1. **Get the Code**
+   - Option 1: Download ZIP
+     - Click "Code" → "Download ZIP" on the repository page
+     - Extract the ZIP file to your desired location
+   - Option 2: Clone with Git
+     ```shell
+     git clone https://github.com/yourusername/cve-utility.git
+     cd cve-utility
+     ```
+
+2. **Run Setup**
    ```shell
    make all
    ```
 
-## Running the Utility
+## Usage
 
-### Windows OS
-1. Create A .txt file with a list of CVEs in the same directory
-2. Run the following Command to run the script.
-    ```shell
-    cmd /c execute.bat run
-    ```
-3. Input the cve file name into the command prompt when asked
-4. To end the server, run control + C in the command prompt.
+### Preparing Input
 
-### Linux/Mac OS
-1. Create A .txt file with a list of CVEs in the same directory
-2. Run the following Command to run the script. It will ask for a cve file so give the cve.txt file as input
-    ```shell
-    make run
-    ```
-3. Input the cve file name into the Terminal when asked
-4. To end the server, run cmd + C in the Terminal.
+1. Create a text file containing your CVE list
+   - One CVE ID per line
+   - Example format:
+     ```
+     CVE-2024-1234
+     CVE-2024-5678
+     ```
+   - Save the file in the project directory
 
-## TroubleShooting
+### Running the Utility
 
-### For OPS Employees in the Office
-Please Set Global Protect Region to Canada Central If you are having issues connecting to the server.
+#### Windows
+```shell
+cmd /c execute.bat run
+```
 
-### Temporary Problems
-The Server that provides the API (Most likely CVE Mitre) is temporarily down sometimes due to maintenance. Please wait until the Server is back up and running to run the script again.
-Check the Command Prompt/Terminal to see if there are error messages pertaining to the Server.
+#### Linux/macOS
+```shell
+make run
+```
+
+Follow the prompts inside command prompt/terminal to:
+1. Enter your input file name or the directory path to your file name.
+2. Wait for processing (it may take serveral minutes for CVE Lists of 200+)
+3. View results in your web browser
+
+### Stopping the Server
+- Windows: Press `Ctrl + C` in Command Prompt
+- Linux/macOS: Press `Cmd + C` in Terminal
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Connection Problems (OPS Employees)**
+   - For People using the utility in the Office: Make sure Global Protect Region is set to Canada Central
+   - Try the following command in the Terminal/Command Prompt. If it fails, it is a OPS network Issue.
+     ```shell
+     pip install numpy
+     ```
+
+2. **API Availability**
+   - CVE Mitre API may have scheduled maintenance
+   - Check terminal/Command Prompt for specific error messages
+   - Retry after a few minutes if servers are down
+
+## Demo
+https://github.com/user-attachments/assets/239ec1db-450a-4a0a-8c29-d0f8d182ec30
+
+
