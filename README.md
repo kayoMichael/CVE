@@ -96,6 +96,8 @@ Follow the prompts inside command prompt/terminal to:
    - Retry after a few minutes if servers are down
 
 ## Demo
-https://github.com/user-attachments/assets/239ec1db-450a-4a0a-8c29-d0f8d182ec30
+https://github.com/user-attachments/assets/9c87b0a7-d43d-4563-8731-2f37a7176b3c
+
+
 
 
