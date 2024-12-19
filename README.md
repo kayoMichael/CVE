@@ -17,9 +17,9 @@ A utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE
    - Option 1: Download ZIP
      - Click "Code" → "Download ZIP" on the repository page
      - Extract the ZIP file to your desired location
-   - Option 2: Clone with Git
+   - Option 2: Clone with Git (For Git users Only)
      ```shell
-     git clone https://github.com/yourusername/cve-utility.git
+     git clone https://github.com/kayoMichael/CVE.git
      cd cve-utility
      ```
 
@@ -34,9 +34,9 @@ A utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE
    - Option 1: Download ZIP
      - Click "Code" → "Download ZIP" on the repository page
      - Extract the ZIP file to your desired location
-   - Option 2: Clone with Git
+   - Option 2: Clone with Git (For Git users Only)
      ```shell
-     git clone https://github.com/yourusername/cve-utility.git
+     git clone https://github.com/kayoMichael/CVE.git
      cd cve-utility
      ```
 
