@@ -1,78 +1,13 @@
-function toggleDescription(userId) {
-    const description = document.getElementById(`${userId}Description`);
-    const toggle = document.getElementById(`${userId}Toggle`);
-    description.classList.toggle('hidden');
-    toggle.querySelector('svg').classList.toggle('flipped-icon');
-}
-
-function formatAIResponse(markdown) {
-    markdown = markdown.replace(/^(#{1,6})\s*(.+)$/gm, (match, hashes, content) => {
-        const level = hashes.length;
-        return `<h${level}>${content}</h${level}>`;
-    });
-
-    markdown = markdown.replace(/\*\*(.*?)\*\*|\_\_(.*?)\_\_/g, '<strong>$1$2</strong>');
-
-    markdown = markdown.replace(/\*(.*?)\*|\_(.*?)\_/g, '<em>$1$2</em>');
-
-    markdown = markdown.replace(/^([*+-])\s+(.*)$/gm, '<ul><li>$2</li></ul>');
-
-    markdown = markdown.replace(/^(\d+)\.\s+(.*)$/gm, '<ol><li>$2</li></ol>');
-
-    markdown = markdown.replace(/\[([^\]]+)\]\((.*?)\)/g, '<a href="$2">$1</a>');
-
-    markdown = markdown.replace(/\n/g, '<br>');
-
-    markdown = markdown.replace(/^([^\n]+)$/gm, '<p>$1</p>');
-
-    return markdown;
-}
-
-
-function fetchAISolution(cveId, buttonElement) {
-    const parentCell = buttonElement.closest('td');
-
-    const existingResponse = parentCell.querySelector('.ai-response');
-    if (existingResponse) {
-        existingResponse.remove();
-        return;
-    }
-
-    buttonElement.disabled = true;
-    const originalContent = buttonElement.innerHTML;
-    buttonElement.innerHTML = `
-        <span class="relative px-3 py-1.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 flex justify-center items-center gap-1">
-            Loading...
-        </span>
-    `;
-
-    fetch(`/api/ai?cve_id=${cveId}`)
-        .then(response => response.json())
-        .then(data => {
-            const responseDiv = document.createElement('div');
-            responseDiv.className = 'ai-response mt-5 p-4 bg-gray-50 rounded-lg';
-            responseDiv.innerHTML = `
-                <h4 class="font-medium text-base mb-2">AI Analysis</h4>
-                <div class="text-sm text-gray-600">
-                    ${data ?  formatAIResponse(data) : 'No AI solution available'}
-                </div>
-            `;
-
-            buttonElement.after(responseDiv);
-        })
-        .catch(error => {
-            console.log(error)
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'ai-response mt-5 p-4 bg-red-50 text-red-600 rounded-lg';
-            errorDiv.textContent = 'Failed to fetch AI analysis. Please try again.';
-            buttonElement.after(errorDiv);
-        })
-        .finally(() => {
-            buttonElement.disabled = false;
-            buttonElement.innerHTML = originalContent;
-        });
-}
-
+/**
+ * Global state management for the CVE table
+ * @typedef {Object} TableState
+ * @property {Array} originalData - Original unfiltered data
+ * @property {Array} filteredData - Data after applying filters and search
+ * @property {string} currentSearchTerm - Current search term
+ * @property {Object} filters - Active filters
+ * @property {Array} filters.severity - Array of active severity levels
+ * @property {Object} sort - Sorting configuration
+ */
 let tableState = {
     originalData: [],
     filteredData: [],
@@ -86,6 +21,106 @@ let tableState = {
     }
 };
 
+/**
+ * Toggles the visibility of a CVE description section
+ * @param {string} userId - Unique identifier for the CVE row
+ */
+function toggleDescription(userId) {
+    const description = document.getElementById(`${userId}Description`);
+    const toggle = document.getElementById(`${userId}Toggle`);
+    description.classList.toggle('hidden');
+    toggle.querySelector('svg').classList.toggle('flipped-icon');
+}
+
+/**
+ * Converts Markdown text to HTML
+ * @param {string} markdown - Markdown formatted text
+ * @returns {string} HTML formatted text
+ */
+function formatAIResponse(markdown) {
+    // Convert headings
+    markdown = markdown.replace(/^(#{1,6})\s*(.+)$/gm, (match, hashes, content) => {
+        const level = hashes.length;
+        return `<h${level}>${content}</h${level}>`;
+    });
+
+    // Convert bold text
+    markdown = markdown.replace(/\*\*(.*?)\*\*|\_\_(.*?)\_\_/g, '<strong>$1$2</strong>');
+
+    // Convert italic text
+    markdown = markdown.replace(/\*(.*?)\*|\_(.*?)\_/g, '<em>$1$2</em>');
+
+    // Convert unordered lists
+    markdown = markdown.replace(/^([*+-])\s+(.*)$/gm, '<ul><li>$2</li></ul>');
+
+    // Convert ordered lists
+    markdown = markdown.replace(/^(\d+)\.\s+(.*)$/gm, '<ol><li>$2</li></ol>');
+
+    // Convert links
+    markdown = markdown.replace(/\[([^\]]+)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+
+    // Convert line breaks
+    markdown = markdown.replace(/\n/g, '<br>');
+
+    // Wrap paragraphs
+    markdown = markdown.replace(/^([^\n]+)$/gm, '<p>$1</p>');
+
+    return markdown;
+}
+
+/**
+ * Fetches and displays AI-generated solution for a specific CVE
+ * @param {string} cveId - CVE identifier
+ * @param {HTMLElement} buttonElement - Button that triggered the fetch
+ */
+function fetchAISolution(cveId, buttonElement) {
+    const parentCell = buttonElement.closest('td');
+    const existingResponse = parentCell.querySelector('.ai-response');
+
+    if (existingResponse) {
+        existingResponse.remove();
+        return;
+    }
+
+    // Show loading state
+    buttonElement.disabled = true;
+    const originalContent = buttonElement.innerHTML;
+    buttonElement.innerHTML = `
+        <span class="relative px-3 py-1.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 flex justify-center items-center gap-1">
+            Loading...
+        </span>
+    `;
+
+    // Fetch AI solution
+    fetch(`/api/ai?cve_id=${cveId}`)
+        .then(response => response.json())
+        .then(data => {
+            const responseDiv = document.createElement('div');
+            responseDiv.className = 'ai-response mt-5 p-4 bg-gray-50 rounded-lg';
+            responseDiv.innerHTML = `
+                <h4 class="font-medium text-base mb-2">AI Analysis</h4>
+                <div class="text-sm text-gray-600">
+                    ${data ? formatAIResponse(data) : 'No AI solution available'}
+                </div>
+            `;
+            buttonElement.after(responseDiv);
+        })
+        .catch(error => {
+            console.log(error);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'ai-response mt-5 p-4 bg-red-50 text-red-600 rounded-lg';
+            errorDiv.textContent = 'Failed to fetch AI analysis. Please try again.';
+            buttonElement.after(errorDiv);
+        })
+        .finally(() => {
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = originalContent;
+        });
+}
+
+/**
+ * Renders the CVE table with current filtered data
+ */
 function renderTable() {
     const tbody = document.querySelector('tbody');
     if (!tbody) return;
@@ -103,7 +138,7 @@ function renderTable() {
         }
 
         return `
-            <tr class="py-10 cursor-pointer border-b border-gray-200 hover:bg-gray-100" 
+            <tr class="py-10 cursor-pointer border-b border-gray-200 hover:bg-gray-100"
                 onclick="toggleDescription('cve${index}')">
                 <td class="px-4 py-4">
                     <div class="flex-1 pl-1">
@@ -162,13 +197,13 @@ function renderTable() {
                     </div>
                     <div class="mt-5">
                         <h4 class="font-medium text-base mb-2">Common Weakness Enumeration</h4>
-                        ${item.problemTypes.reference ? 
-                            `<a href="${item.problemTypes.reference}" class="text-sm text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">${item.problemTypes.description}</a>` :
-                            `<p class="text-sm text-gray-600">${item.problemTypes.description}</p>`
-                        }
-                    </div>                 
-                    <div class="mt-5"> 
-                        <h4 class="font-medium text-base mb-2">National Institute of Standards and Technology</h4> 
+                        ${item.problemTypes.reference ?
+            `<a href="${item.problemTypes.reference}" class="text-sm text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">${item.problemTypes.description}</a>` :
+            `<p class="text-sm text-gray-600">${item.problemTypes.description}</p>`
+        }
+                    </div>
+                    <div class="mt-5">
+                        <h4 class="font-medium text-base mb-2">National Institute of Standards and Technology</h4>
                         <a target="_blank" rel="noopener noreferrer"  class="text-sm text-blue-600 dark:text-blue-500 hover:underline" href="https://nvd.nist.gov/vuln/detail/${item.cve_id}">https://nvd.nist.gov/vuln/detail/${item.cve_id}</a>
                     </div>
                     <div class="mt-5">
@@ -188,7 +223,7 @@ function renderTable() {
                         <h4 class="font-medium text-base mb-2">Potential Solution</h4>
                         <p class="text-sm text-gray-600">${item.vulnerability.solution ? item.vulnerability.solution : "Not Specified"}</p>
                     </div>
-                    <button onclick="event.stopPropagation(); fetchAISolution('${item.metadata.id}', this)" 
+                    <button onclick="event.stopPropagation(); fetchAISolution('${item.metadata.id}', this)"
                             class="mt-8 relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-xs font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 group-hover:from-cyan-500 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800">
                         <span class="relative px-3 py-1.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 flex justify-center items-center gap-1">
                             AI Solution
@@ -201,6 +236,10 @@ function renderTable() {
     }).join('');
 }
 
+/**
+ * Applies search term and filters to the table data
+ * @param {string} searchTerm - Search term to filter by
+ */
 function applySearchAndFilters(searchTerm = '') {
     tableState.currentSearchTerm = searchTerm.toLowerCase().trim();
 
@@ -220,6 +259,9 @@ function applySearchAndFilters(searchTerm = '') {
     renderTable();
 }
 
+/**
+ * Fetches CVE data from the API and initializes the table
+ */
 function createTableRow() {
     fetch('/api/cve')
         .then(response => response.json())
@@ -230,6 +272,9 @@ function createTableRow() {
         });
 }
 
+/**
+ * Sets up severity filter checkboxes and their event listeners
+ */
 function filter() {
     const dropdownMenu = document.getElementById('dropdownDefaultCheckbox');
     const checkboxes = dropdownMenu?.querySelectorAll('input[type="checkbox"]');
@@ -251,6 +296,7 @@ function filter() {
     });
 }
 
+// Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('default-search');
     if (!searchInput) {
