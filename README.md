@@ -1,14 +1,13 @@
 # CVE Utility
 
-A utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE) information from authoritative sources including the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/).
+A utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE) information from public sources including the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/).
 
 ## Features
 
-- Bulk CVE information retrieval
-- To Bypass Rate Limiting from an API, this utility Scraps the Relevant CVE Resource Pages Asynchronously.
+- Bulk CVE information retrieval.
+- Basic Filtering and Searching Capabilities.
 - Vulnerability analysis
 - AI-powered suggestions using Meta's [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/) model
-- Basic Filtering and Searching Capabilities.
 
 ## Installation
 
@@ -82,7 +81,16 @@ Follow the prompts inside command prompt/terminal to:
 
 ## Troubleshooting
 
-### Common Issues
+### Unknown CVE Inputs
+
+The Utility will automatically skip CVEs that are not found in the database. Please Check the Terminal/Command Prompt for any errors.
+
+#### Sample Not Found Error Message
+```commandline
+The CVE code CVE-2023-29832 is not found in the database. Skipping...
+```
+
+### Connection Issues
 
 1. **Connection Problems (OPS Employees)**
    - For People using the utility in the Office: Make sure Global Protect Region is set to Canada Central
@@ -95,6 +103,13 @@ Follow the prompts inside command prompt/terminal to:
    - CVE Mitre API may have scheduled maintenance
    - Check terminal/Command Prompt for specific error messages
    - Retry after a few minutes if servers are down
+
+#### Sample Connection Error Message (Also Triggers if All CVE input is Unknown)
+```commandline
+Server is most likely down or Service is temporarily suspended. Please Check a sample site like https://www.cve.org/CVERecord?id=CVE-2022-22971
+If the Server is running, In addition, Make sure Global Protect is in Central Canada for best result
+Please also make sure the CVE codes are valid in the text file inputted.
+```
 
 ## Demo
 https://github.com/user-attachments/assets/9c87b0a7-d43d-4563-8731-2f37a7176b3c
