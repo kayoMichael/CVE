@@ -173,47 +173,6 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # Minimise the CVE Data given to the AI as prompt for better performance
-        '''
-        formatted_data = {
-                "cve_id": data.get('cveMetadata', {}).get('cveId'),
-                'metadata': {
-                    'id': data.get('cveMetadata', {}).get('cveId'),
-                    'state': data.get('cveMetadata', {}).get('state'),
-                    'datePublished': data.get('cveMetadata', {}).get('datePublished'),
-                    'dateUpdated': data.get('cveMetadata', {}).get('dateUpdated')
-                },
-                'vulnerability': {
-                    'title': cna.get('title'),
-                    'description': description,
-                    'solution': solution,
-                    'severity': {
-                        'level': base_severity,
-                        'baseScore': base_score,
-                        'vector': adp.get('metrics', [{}])[0].get('cvssV3_1', {}).get('vectorString') or cna.get('metrics', [{}])[0].get('cvssV3_1', {}).get('vectorString')
-                    }
-                },
-                'affected': {
-                    'vendor': adp.get('affected', [{}])[0].get('vendor') or cna.get('affected', [{}])[0].get('vendor'),
-                    'product': adp.get('affected', [{}])[0].get('product') or cna.get('affected', [{}])[0].get('product'),
-                    'versions': {
-                        'from': adp.get('affected', [{}])[0].get('versions', [{}])[0].get('version') or cna.get('affected', [{}])[0].get('versions', [{}])[0].get('version'),
-                        'to': adp.get('affected', [{}])[0].get('versions', [{}])[0].get('lessThanOrEqual') or cna.get('affected', [{}])[0].get('versions', [{}])[0].get('lessThanOrEqual')
-                    }
-                },
-                'references': [
-                    {
-                        'url': ref.get('url'),
-                        'tags': ref.get('tags', [])
-                    }
-                    for ref in cna.get('references', [])
-                ],
-                'problemTypes': {
-                    'cweId': cwe_id,
-                    'description': adp.get('problemTypes', [{}])[0].get('descriptions', [{}])[0].get('description') or cna.get('problemTypes', [{}])[0].get('descriptions', [{}])[0].get('description'),
-                    'reference': f'https://cwe.mitre.org/data/definitions/{cwe_id.split("-")[1]}.html' if cwe_id and '-' in cwe_id else None
-                }
-            }
-        '''
         ai_prompt = {
             "cve_id": cve_data.get("cve_id"),
             "CVE description": cve_data.get('vulnerability').get("description"),

@@ -5,6 +5,7 @@ A utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE
 ## Features
 
 - Bulk CVE information retrieval
+- To Bypass Rate Limiting from an API, this utility Scraps the Relevant CVE Resource Pages Asynchronously.
 - Vulnerability analysis
 - AI-powered suggestions using Meta's [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/) model
 - Basic Filtering and Searching Capabilities.
