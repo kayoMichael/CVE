@@ -9,6 +9,10 @@ An AI-powered utility for retrieving and analyzing Common Vulnerabilities and Ex
 - Vulnerability analysis
 - AI-powered suggestions using Meta's [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/) model
 
+## Demo
+
+https://github.com/user-attachments/assets/e16df379-db0a-4bc1-8dd7-b5364cfa2238
+
 ## Installation
 
 Please Refer to the [Installation Demo](https://github.com/kayoMichael/CVE/edit/main/README.md#installation-demo) for an Example
