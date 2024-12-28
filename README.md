@@ -1,6 +1,6 @@
 # CVE Utility
 
-A utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE) information from public sources including the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/).
+An AI-powered utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE) information from user input fetching relevant information from public sources including the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/).
 
 ## Features
 
@@ -11,6 +11,7 @@ A utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE
 
 ## Installation
 
+Please Refer to the [Installation Demo](https://github.com/kayoMichael/CVE/edit/main/README.md#installation-demo) for an Example
 ### Windows
 
 1. **Get the Code**
@@ -113,7 +114,7 @@ If the Server is running, In addition, Make sure Global Protect is in Central Ca
 Please also make sure the CVE codes are valid in the text file inputted.
 ```
 
-## Demo
+## Installation Demo
 https://github.com/user-attachments/assets/9c87b0a7-d43d-4563-8731-2f37a7176b3c
 
 
