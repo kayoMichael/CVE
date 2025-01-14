@@ -1,13 +1,17 @@
 # CVE Utility
 
-An AI-powered utility for retrieving and analyzing Common Vulnerabilities and Exposures (CVE) information from user input fetching relevant information from public sources including the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/).
+An AI-powered Full Stack Application designed to retrieve and analyze Common Vulnerabilities and Exposures (CVE) data based on user input, leveraging public sources such as the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/) for accurate and comprehensive information.
 
 ## Features
 
 - Bulk CVE information retrieval.
 - Basic Filtering and Searching Capabilities.
 - Vulnerability analysis
-- AI-powered suggestions using Meta's [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/) model
+- AI-powered Solutions using Meta's [llama-3.1-70b](https://ai.meta.com/blog/meta-llama-3-1/) model
+
+## Demo
+
+https://github.com/user-attachments/assets/e16df379-db0a-4bc1-8dd7-b5364cfa2238
 
 ## Installation
 
@@ -75,7 +79,7 @@ make run
 
 Follow the prompts inside command prompt/terminal to:
 1. Enter your input file name or the directory path to your file name.
-2. Wait for processing (it may take serveral minutes for CVE Lists of 200+)
+2. Wait for processing (it may take serveral minutes for CVE Lists of 600+)
 3. View results in your web browser
 
 ### Stopping the Server
