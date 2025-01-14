@@ -11,7 +11,7 @@ An AI-powered utility for retrieving and analyzing Common Vulnerabilities and Ex
 
 ## Installation
 
-Please Refer to the [Installation Demo](https://github.com/kayoMichael/CVE/edit/main/README.md#installation-demo) for an Example
+Please Refer to the [Installation Demo](#installation-demo) for an Example
 ### Windows
 
 1. **Get the Code**
