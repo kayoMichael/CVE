@@ -1,6 +1,7 @@
 # CVE Utility
-
 An AI-powered Full Stack Application designed to retrieve and analyze Common Vulnerabilities and Exposures (CVE) data based on user input, leveraging public sources such as the [National Vulnerability Database](https://nvd.nist.gov/) and [CVE Mitre](https://cve.mitre.org/) for accurate and comprehensive information.
+
+This Application was created for the Ontario Public Services Operations Team at the Ministry of Education for their management of CVEs. For TroubleShooting for OPS employees, please see [Connection Issues for OPS](#connection-issues).
 
 ## Features
 
